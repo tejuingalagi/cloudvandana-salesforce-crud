@@ -3,6 +3,8 @@ package com.tejeshwini.salesforcecrud.controller;
 import com.tejeshwini.salesforcecrud.service.SalesforceApiService;
 
 import jakarta.servlet.http.HttpSession;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,4 +60,17 @@ public class SalesforceApiController {
                 industry,
                 session);
     }
+    
+    @DeleteMapping("/api/salesforce/accounts/{accountId}")
+    public String deleteAccount(
+            @PathVariable String accountId,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.deleteAccount(
+                accountId,
+                session);
+    }
+    
+    
 }

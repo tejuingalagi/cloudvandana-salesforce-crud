@@ -171,4 +171,47 @@ public class SalesforceApiService {
 
         return "{\"success\":true,\"message\":\"Account updated successfully\"}";
     }
+    
+    public String deleteAccount(
+            String accountId,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Account/"
+                + accountId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Account deletion failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Account deleted successfully\"}";
+    }
 }
