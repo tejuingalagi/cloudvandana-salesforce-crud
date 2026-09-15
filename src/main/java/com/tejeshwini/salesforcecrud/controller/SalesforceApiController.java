@@ -1,11 +1,15 @@
 package com.tejeshwini.salesforcecrud.controller;
 
 import com.tejeshwini.salesforcecrud.service.SalesforceApiService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
 public class SalesforceApiController {
@@ -33,6 +37,22 @@ public class SalesforceApiController {
             throws Exception {
 
         return salesforceApiService.createAccount(
+                name,
+                type,
+                industry,
+                session);
+    }
+    @PatchMapping("/api/salesforce/accounts/{accountId}")
+    public String updateAccount(
+            @PathVariable  String accountId,
+            @RequestParam String name,
+            @RequestParam String type,
+            @RequestParam String industry,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.updateAccount(
+                accountId,
                 name,
                 type,
                 industry,

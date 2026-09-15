@@ -115,4 +115,60 @@ public class SalesforceApiService {
 
         return response.body();
     }
+    
+    public String updateAccount(
+            String accountId,
+            String name,
+            String type,
+            String industry,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String jsonBody =
+                "{"
+                + "\"Name\":\"" + name + "\","
+                + "\"Type\":\"" + type + "\","
+                + "\"Industry\":\"" + industry + "\""
+                + "}";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Account/"
+                + accountId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .method(
+                        "PATCH",
+                        HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Account update failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Account updated successfully\"}";
+    }
 }
