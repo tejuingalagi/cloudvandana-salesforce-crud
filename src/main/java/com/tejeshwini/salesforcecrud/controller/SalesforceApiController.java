@@ -121,4 +121,18 @@ public class SalesforceApiController {
                 session);
     }
     
+    @DeleteMapping("/api/salesforce/opportunities/{opportunityId}")
+    public String deleteOpportunity(
+
+            @PathVariable String opportunityId,
+
+            HttpSession session)
+
+            throws Exception {
+
+        return salesforceApiService.deleteOpportunity(
+                opportunityId,
+                session);
+    }
+    
 }

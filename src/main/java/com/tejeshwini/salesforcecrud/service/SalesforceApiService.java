@@ -370,4 +370,47 @@ public class SalesforceApiService {
 
         return "{\"success\":true,\"message\":\"Opportunity updated successfully\"}";
     }
+    
+    public String deleteOpportunity(
+            String opportunityId,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Opportunity/"
+                + opportunityId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Opportunity deletion failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Opportunity deleted successfully\"}";
+    }
 }
