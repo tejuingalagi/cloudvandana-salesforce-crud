@@ -95,6 +95,30 @@ public class SalesforceApiController {
                 amount,
                 session);
     }
-    
+    @PatchMapping("/api/salesforce/opportunities/{opportunityId}")
+    public String updateOpportunity(
+
+            @PathVariable String opportunityId,
+
+            @RequestParam String name,
+
+            @RequestParam String stageName,
+
+            @RequestParam String closeDate,
+
+            @RequestParam String amount,
+
+            HttpSession session)
+
+            throws Exception {
+
+        return salesforceApiService.updateOpportunity(
+                opportunityId,
+                name,
+                stageName,
+                closeDate,
+                amount,
+                session);
+    }
     
 }

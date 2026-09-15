@@ -312,4 +312,62 @@ public class SalesforceApiService {
 
         return response.body();
     }
+    
+    public String updateOpportunity(
+            String opportunityId,
+            String name,
+            String stageName,
+            String closeDate,
+            String amount,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String jsonBody =
+                "{"
+                + "\"Name\":\"" + name + "\","
+                + "\"StageName\":\"" + stageName + "\","
+                + "\"CloseDate\":\"" + closeDate + "\","
+                + "\"Amount\":" + amount
+                + "}";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Opportunity/"
+                + opportunityId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .method(
+                        "PATCH",
+                        HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Opportunity update failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Opportunity updated successfully\"}";
+    }
 }
