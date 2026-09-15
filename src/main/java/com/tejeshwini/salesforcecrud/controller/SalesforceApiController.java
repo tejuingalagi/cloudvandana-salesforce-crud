@@ -72,5 +72,29 @@ public class SalesforceApiController {
                 session);
     }
     
+    @GetMapping("/api/salesforce/opportunities")
+    public String getOpportunities(HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.getOpportunities(session);
+    }
+    
+    @PostMapping("/api/salesforce/opportunities")
+    public String createOpportunity(
+            @RequestParam String name,
+            @RequestParam String stageName,
+            @RequestParam String closeDate,
+            @RequestParam String amount,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.createOpportunity(
+                name,
+                stageName,
+                closeDate,
+                amount,
+                session);
+    }
+    
     
 }
