@@ -134,5 +134,79 @@ public class SalesforceApiController {
                 opportunityId,
                 session);
     }
+    @GetMapping("/api/salesforce/leads")
+    public String getLeads(HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.getLeads(session);
+    }
+    
+    @PostMapping("/api/salesforce/leads")
+    public String createLead(
+
+            @RequestParam String firstName,
+
+            @RequestParam String lastName,
+
+            @RequestParam String company,
+
+            @RequestParam String status,
+
+            @RequestParam String email,
+
+            HttpSession session)
+
+            throws Exception {
+
+        return salesforceApiService.createLead(
+                firstName,
+                lastName,
+                company,
+                status,
+                email,
+                session);
+    }
+    
+    @PatchMapping("/api/salesforce/leads/{leadId}")
+    public String updateLead(
+
+            @PathVariable String leadId,
+
+            @RequestParam String firstName,
+
+            @RequestParam String lastName,
+
+            @RequestParam String company,
+
+            @RequestParam String status,
+
+            @RequestParam String email,
+
+            HttpSession session)
+
+            throws Exception {
+
+        return salesforceApiService.updateLead(
+                leadId,
+                firstName,
+                lastName,
+                company,
+                status,
+                email,
+                session);
+    }
+    
+    @DeleteMapping("/api/salesforce/leads/{leadId}")
+    public String deleteLead(
+            @PathVariable String leadId,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.deleteLead(
+                leadId,
+                session);
+    }
+    
+    
     
 }

@@ -413,4 +413,208 @@ public class SalesforceApiService {
 
         return "{\"success\":true,\"message\":\"Opportunity deleted successfully\"}";
     }
+    
+    public String getLeads(HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String soql =
+                "SELECT Id, FirstName, LastName, Company, Status, Email FROM Lead LIMIT 20";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/query/?q="
+                + URLEncoder.encode(soql, StandardCharsets.UTF_8);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new IllegalStateException(
+                    "Lead API request failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return response.body();
+    }
+    
+    public String createLead(
+            String firstName,
+            String lastName,
+            String company,
+            String status,
+            String email,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String jsonBody =
+                "{"
+                + "\"FirstName\":\"" + firstName + "\","
+                + "\"LastName\":\"" + lastName + "\","
+                + "\"Company\":\"" + company + "\","
+                + "\"Status\":\"" + status + "\","
+                + "\"Email\":\"" + email + "\""
+                + "}";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Lead/";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 201) {
+            throw new IllegalStateException(
+                    "Lead creation failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return response.body();
+    }
+    public String updateLead(
+            String leadId,
+            String firstName,
+            String lastName,
+            String company,
+            String status,
+            String email,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String jsonBody =
+                "{"
+                + "\"FirstName\":\"" + firstName + "\","
+                + "\"LastName\":\"" + lastName + "\","
+                + "\"Company\":\"" + company + "\","
+                + "\"Status\":\"" + status + "\","
+                + "\"Email\":\"" + email + "\""
+                + "}";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Lead/"
+                + leadId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .method(
+                        "PATCH",
+                        HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Lead update failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Lead updated successfully\"}";
+    }
+    
+    public String deleteLead(
+            String leadId,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Lead/"
+                + leadId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Lead deletion failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Lead deleted successfully\"}";
+    }
+    
+    
 }
