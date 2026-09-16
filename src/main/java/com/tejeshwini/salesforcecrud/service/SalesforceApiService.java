@@ -1,7 +1,10 @@
 package com.tejeshwini.salesforcecrud.service;
 
 import jakarta.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,15 +13,23 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import jakarta.servlet.http.HttpSession;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Map;
 @Service
 public class SalesforceApiService {
 
-    private final HttpClient httpClient;
+	private final HttpClient httpClient;
+	private final ObjectMapper objectMapper;
 
-    public SalesforceApiService() {
-        this.httpClient = HttpClient.newHttpClient();
-    }
+	public SalesforceApiService(ObjectMapper objectMapper) {
+	    this.httpClient = HttpClient.newHttpClient();
+	    this.objectMapper = objectMapper;
+	}
 
     public String getAccounts(HttpSession session)
             throws IOException, InterruptedException {
@@ -615,6 +626,389 @@ public class SalesforceApiService {
 
         return "{\"success\":true,\"message\":\"Lead deleted successfully\"}";
     }
+    public String getContacts(HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String soql =
+                "SELECT Id, FirstName, LastName, AccountId, Email, Phone FROM Contact LIMIT 20";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/query/?q="
+                + URLEncoder.encode(soql, StandardCharsets.UTF_8);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new IllegalStateException(
+                    "Contact API request failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return response.body();
+    }
     
+    public String createContact(
+            String firstName,
+            String lastName,
+            String accountId,
+            String email,
+            String phone,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String jsonBody =
+                "{"
+                + "\"FirstName\":\"" + firstName + "\","
+                + "\"LastName\":\"" + lastName + "\","
+                + "\"AccountId\":\"" + accountId + "\","
+                + "\"Email\":\"" + email + "\","
+                + "\"Phone\":\"" + phone + "\""
+                + "}";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Contact/";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 201) {
+            throw new IllegalStateException(
+                    "Contact creation failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return response.body();
+    }
+    
+    public String updateContact(
+            String contactId,
+            String firstName,
+            String lastName,
+            String accountId,
+            String email,
+            String phone,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String jsonBody =
+                "{"
+                + "\"FirstName\":\"" + firstName + "\","
+                + "\"LastName\":\"" + lastName + "\","
+                + "\"AccountId\":\"" + accountId + "\","
+                + "\"Email\":\"" + email + "\","
+                + "\"Phone\":\"" + phone + "\""
+                + "}";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Contact/"
+                + contactId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .method(
+                        "PATCH",
+                        HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Contact update failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Contact updated successfully\"}";
+    }
+    
+    public String deleteContact(
+            String contactId,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Contact/"
+                + contactId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Contact deletion failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Contact deleted successfully\"}";
+    }
+    
+    public String getCases(HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String soql =
+                "SELECT Id, CaseNumber, Subject, Status, Priority, Origin FROM Case LIMIT 20";
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/query/?q="
+                + URLEncoder.encode(soql, StandardCharsets.UTF_8);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 200) {
+            throw new IllegalStateException(
+                    "Case API request failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return response.body();
+    }
+    
+    public String createCase(
+            Map<String, Object> caseData,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Case";
+
+        String requestBody =
+                objectMapper.writeValueAsString(caseData);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 201) {
+            throw new IllegalStateException(
+                    "Case create failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return response.body();
+    }
+    
+    public String updateCase(
+            String caseId,
+            Map<String, Object> caseData,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Case/"
+                + caseId;
+
+        String requestBody =
+        		objectMapper.writeValueAsString(caseData);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .method(
+                        "PATCH",
+                        HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Case update failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Case updated successfully\"}";
+    }
+    public String deleteCase(
+            String caseId,
+            HttpSession session)
+            throws IOException, InterruptedException {
+
+        String accessToken =
+                (String) session.getAttribute("access_token");
+
+        String instanceUrl =
+                (String) session.getAttribute("instance_url");
+
+        if (accessToken == null || instanceUrl == null) {
+            throw new IllegalStateException(
+                    "Salesforce authentication required. Please login first.");
+        }
+
+        String url =
+                instanceUrl
+                + "/services/data/v67.0/sobjects/Case/"
+                + caseId;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + accessToken)
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() != 204) {
+            throw new IllegalStateException(
+                    "Case delete failed. Status: "
+                    + response.statusCode()
+                    + ", Response: "
+                    + response.body());
+        }
+
+        return "{\"success\":true,\"message\":\"Case deleted successfully\"}";
+    }
     
 }

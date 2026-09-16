@@ -4,12 +4,15 @@ import com.tejeshwini.salesforcecrud.service.SalesforceApiService;
 
 import jakarta.servlet.http.HttpSession;
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PatchMapping;
 
@@ -207,6 +210,114 @@ public class SalesforceApiController {
                 session);
     }
     
+    @GetMapping("/api/salesforce/contacts")
+    public String getContacts(HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.getContacts(session);
+    }
+    @PostMapping("/api/salesforce/contacts")
+    public String createContact(
+
+            @RequestParam String firstName,
+
+            @RequestParam String lastName,
+
+            @RequestParam String accountId,
+
+            @RequestParam String email,
+
+            @RequestParam String phone,
+
+            HttpSession session)
+
+            throws Exception {
+
+        return salesforceApiService.createContact(
+                firstName,
+                lastName,
+                accountId,
+                email,
+                phone,
+                session);
+    }
     
+    @PatchMapping("/api/salesforce/contacts/{contactId}")
+    public String updateContact(
+
+            @PathVariable String contactId,
+
+            @RequestParam String firstName,
+
+            @RequestParam String lastName,
+
+            @RequestParam String accountId,
+
+            @RequestParam String email,
+
+            @RequestParam String phone,
+
+            HttpSession session)
+
+            throws Exception {
+
+        return salesforceApiService.updateContact(
+                contactId,
+                firstName,
+                lastName,
+                accountId,
+                email,
+                phone,
+                session);
+    }
     
+    @DeleteMapping("/api/salesforce/contacts/{contactId}")
+    public String deleteContact(
+            @PathVariable String contactId,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.deleteContact(
+                contactId,
+                session);
+    }
+    
+    @GetMapping("/api/salesforce/cases")
+    public String getCases(HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.getCases(session);
+    }
+    @PostMapping("/api/salesforce/cases")
+    public String createCase(
+            @RequestBody Map<String, Object> caseData,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.createCase(
+                caseData,
+                session);
+    }
+    @PatchMapping("/api/salesforce/cases/{caseId}")
+    public String updateCase(
+            @PathVariable String caseId,
+            @RequestBody Map<String, Object> caseData,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.updateCase(
+                caseId,
+                caseData,
+                session);
+    }
+    @DeleteMapping("/api/salesforce/cases/{caseId}")
+    public String deleteCase(
+            @PathVariable String caseId,
+            HttpSession session)
+            throws Exception {
+
+        return salesforceApiService.deleteCase(
+                caseId,
+                session);
+    }
 }
